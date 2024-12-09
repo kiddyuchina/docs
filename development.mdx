@@ -1,106 +1,126 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: "自托管 Basemulti"
+description: "本指南将帮助您在本地环境或服务器上设置和运行 Basemulti。"
 ---
 
-<Info>
-  **Prerequisite**: Please install Node.js (version 19 or higher) before proceeding.
-</Info>
+## 必要的环境
 
-Follow these steps to install and run Mintlify on your operating system:
+在开始之前，请确保您的系统已安装以下软件：
 
-**Step 1**: Install Mintlify:
+* Node.js (v14.x 或更高版本)
 
-<CodeGroup>
+* npm (v6.x 或更高版本)
 
-  ```bash npm
-  npm i -g mintlify
-  ```
+* Git
 
-```bash yarn
-yarn global add mintlify
-```
+* 支持的数据库 (MySQL, PostgreSQL, SQLite, 或 MariaDB)
 
-</CodeGroup>
+## 本地开发
 
-**Step 2**: Navigate to the docs directory (where the `mint.json` file is located) and execute the following command:
+### 1. 克隆存储库
 
 ```bash
-mintlify dev
+git clone https://github.com/basemulti/basemulti.git
+cd basemulti
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
-
-### Custom Ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. To run Mintlify on port 3333, for instance, use this command:
+### 2. 安装依赖项
 
 ```bash
-mintlify dev --port 3333
+npm install
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+### 3. 配置环境变量
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify Versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local website doesn't align with the production version, please update the CLI:
-
-<CodeGroup>
-
-```bash npm
-npm i -g mintlify@latest
-```
-
-```bash yarn
-yarn global upgrade mintlify
-```
-
-</CodeGroup>
-
-## Validating Links
-
-The CLI can assist with validating reference links made in your documentation. To identify any broken links, use the following command:
+复制示例环境文件并根据您的需求进行修改：
 
 ```bash
-mintlify broken-links
+cp .env.example .env
 ```
 
-## Deployment
+使用您喜欢的文本编辑器打开 .env 文件，并填写必要的配置信息，如数据库连接详情。
 
-<Tip>
-  Unlimited editors available under the [Pro
-  Plan](https://mintlify.com/pricing) and above.
-</Tip>
+### 4. 生成加密密钥
 
-If the deployment is successful, you should see the following:
+```bash
+npm run key:generate
+```
 
-<Frame>
-  <img src="/images/checks-passed.png" style={{ borderRadius: '0.5rem' }} />
-</Frame>
+这将更新您的 .env 文件，添加一个用于加密的安全密钥。
 
-## Code Formatting
+### 5. 运行数据库迁移
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+```bash
+npm run migrate
+```
 
-## Troubleshooting
+### 6. 启动开发服务器
 
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
+```bash
+npm run dev
+```
 
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of mintlify: `npm remove -g mintlify`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall mintlify: `npm install -g mintlify`
-  </Accordion>
+现在，您可以在浏览器中访问 http://localhost:3000 来查看 Basemulti 应用程序。
 
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the \~/.mintlify folder. Afterwards, run `mintlify dev` again.
-  </Accordion>
-</AccordionGroup>
 
-Curious about what changed in the CLI version? [Check out the CLI changelog.](https://www.npmjs.com/package/mintlify?activeTab=versions)
+## 服务器安装
+
+在生产服务器上安装 Basemulti 的步骤与本地开发类似，但有一些额外的注意事项：
+
+1. 确保您使用的是生产级的数据库设置。
+
+2. 设置适当的环境变量，尤其是 `NODE_ENV=production`。
+
+3. 使用进程管理器（如 PM2）来保持应用程序运行。
+
+### 使用 PM2 部署
+
+安装 PM2：
+
+```bash
+npm install -g pm2
+```
+
+构建生产版本：
+
+```bash
+npm run build
+```
+
+使用 PM2 启动应用程序：
+
+```bash
+pm2 start npm --name "basemulti" -- start
+```
+
+## Vercel 部署
+
+Basemulti 可以轻松部署到 Vercel 平台。请按照以下步骤操作：
+
+1. 在 GitHub 上 fork Basemulti 仓库。
+
+2. 在 Vercel 仪表板中，单击 "New Project"。
+
+3. 导入您 fork 的 Basemulti 仓库。
+
+4. Vercel 将自动检测项目设置。确保构建命令和输出目录正确无误。
+
+5. 在 "Environment Variables" 部分，添加所有必要的环境变量。
+
+6. 点击 "Deploy" 开始部署过程。
+
+部署完成后，Vercel 将提供一个 URL 来访问您的 Basemulti 实例。
+
+请记住，对于生产环境，您需要将 Basemulti 连接到一个持久的数据库服务，而不是使用本地数据库。
+
+## 故障排除
+
+如果您在设置过程中遇到任何问题，请检查以下几点：
+
+* 确保所有环境变量都已正确设置。
+
+* 检查数据库连接是否正常工作。
+
+* 查看应用程序日志以获取详细的错误信息。
+
+如果问题仍然存在，请在 GitHub 仓库上提出 issue，或查阅我们的文档获取更多帮助。
